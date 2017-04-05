@@ -1,6 +1,6 @@
 #include "ActionSystem.h"
 #include "CmdTranslator.h"
-#include "Entity.h"
+#include "Component.h"
 #include "LuaEntity.h"
 
 void ActionSystem::Advance(EntityList& entities)
@@ -41,11 +41,8 @@ void ActionSystem::Advance(EntityList& entities)
 			// Call Lua action script
 			std::string fn = "action_";
 			fn += current->Name;
-			Entity e(&entities, i);
-			//lua_pushstring(L, fn.c_str());
-			//lua_gettable (L, LUA_GLOBALSINDEX);
 			lua_getglobal(L, fn.c_str());
-			luaU_pushEntity(L, &e);
+			luaU_pushEntity(L, &entities, i);
 			if (lua_pcall(L, 1, 0, 0))
 				std::cerr << lua_tostring(L, -1) << std::endl;
 

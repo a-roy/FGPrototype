@@ -42,9 +42,6 @@
     <ClInclude Include="GraphicsSystem.h">
       <Filter>Header Files\Entity-Component-System</Filter>
     </ClInclude>
-    <ClInclude Include="Entity.h">
-      <Filter>Header Files\Entity-Component-System</Filter>
-    </ClInclude>
     <ClInclude Include="Component.h">
       <Filter>Header Files\Entity-Component-System</Filter>
     </ClInclude>
@@ -126,9 +123,6 @@
       <Filter>Source Files\Entity-Component-System</Filter>
     </ClCompile>
     <ClCompile Include="LuaEntity.cpp">
-      <Filter>Source Files\Entity-Component-System</Filter>
-    </ClCompile>
-    <ClCompile Include="Entity.cpp">
       <Filter>Source Files\Entity-Component-System</Filter>
     </ClCompile>
     <ClCompile Include="BoneAnimation.cpp">

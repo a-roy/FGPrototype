@@ -1,5 +1,5 @@
 #include "LuaEntity.h"
-#include "Entity.h"
+#include "Component.h"
 
 extern "C"
 {
@@ -10,10 +10,11 @@ extern "C"
 
 int Entity_time(lua_State *L)
 {
-	Entity *e = luaU_toEntity(L, 1);
+	EntityList *e = luaU_toEntityList(L, 1);
+	int i = luaU_toEntityI(L, 1);
 	int lower = luaL_checkinteger(L, 2);
 	int upper = luaL_checkinteger(L, 3);
-	int t = e->Entities->action[e->Index].Time;
+	int t = e->action[i].Time;
 	bool b = (t >= lower && t <= upper);
 	lua_pushboolean(L, b);
 	return 1;
@@ -21,17 +22,19 @@ int Entity_time(lua_State *L)
 
 int Entity_cancel(lua_State *L)
 {
-	Entity *e = luaU_toEntity(L, 1);
+	EntityList *e = luaU_toEntityList(L, 1);
+	int i = luaU_toEntityI(L, 1);
 	int l = luaL_checkinteger(L, 2);
-	e->ActCancel(l);
+	e->action[i].CancelList = l;
 	return 0;
 }
 
 int Entity_move(lua_State *L)
 {
-	Entity *e = luaU_toEntity(L, 1);
+	EntityList *e = luaU_toEntityList(L, 1);
+	int i = luaU_toEntityI(L, 1);
 	int d = luaL_checkinteger(L, 2);
-	e->ActMove(d);
+	e->placement[i].X += e->placement[i].O * d;
 	return 0;
 }
 
@@ -57,18 +60,28 @@ int luaopen_Entity(lua_State *L)
 	return 1;
 }
 
-void luaU_pushEntity(lua_State *L, Entity *e)
+void luaU_pushEntity(lua_State *L, EntityList *e, int i)
 {
 	lua_createtable(L, 1, 0);
 	lua_pushlightuserdata(L, (void *)e);
 	lua_rawseti(L, -2, 1);
+	lua_pushinteger(L, i);
+	lua_rawseti(L, -2, 2);
 	luaL_setmetatable(L, "Entity");
 }
 
-Entity *luaU_toEntity(lua_State *L, int n)
+EntityList *luaU_toEntityList(lua_State *L, int n)
 {
 	lua_rawgeti(L, n, 1);
-	Entity *e = static_cast<Entity *>(lua_touserdata(L, -1));
+	EntityList *e = static_cast<EntityList *>(lua_touserdata(L, -1));
 	lua_pop(L, 1);
 	return e;
+}
+
+int luaU_toEntityI(lua_State *L, int n)
+{
+	lua_rawgeti(L, n, 2);
+	int i = lua_tointeger(L, -1);
+	lua_pop(L, 1);
+	return i;
 }
