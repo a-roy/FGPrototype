@@ -2,8 +2,8 @@
 
 enum HitboxFlags
 {
-	Action = 0x01,
-	Reaction = 0x02,
+	Act = 0x01,
+	React = 0x02,
 	Strike = 0x04,
 	Throw = 0x08,
 	AirThrow = 0x10,

@@ -22,19 +22,19 @@ void CollisionSystem::Test(EntityList& entities)
 		Hitbox *act;
 		Hitbox *react;
 		// for now we don't really care if both boxes have both flags
-		if ((h1.Flags & Action) && (h2.Flags & Reaction))
+		if ((h1.Flags & Act) && (h2.Flags & React))
 		{
 			act = &h1;
 			react = &h2;
 		}
-		else if ((h2.Flags & Action) && (h1.Flags & Reaction))
+		else if ((h2.Flags & Act) && (h1.Flags & React))
 		{
 			act = &h2;
 			react = &h1;
 		}
 		//else continue;
-		HitboxFlags actflags = (HitboxFlags)(act->Flags & ~Action & ~Reaction);
-		HitboxFlags reactflags = (HitboxFlags)(react->Flags & ~Action & ~Reaction);
+		HitboxFlags actflags = (HitboxFlags)(act->Flags & ~Act & ~React);
+		HitboxFlags reactflags = (HitboxFlags)(react->Flags & ~Act & ~React);
 		if ((reactflags & actflags) == actflags)
 		{
 			// something happens

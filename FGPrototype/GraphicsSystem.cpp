@@ -8,49 +8,58 @@ void GraphicsSystem::Render(EntityList& entities)
 			&& entities.enabled[i][IPlacement]
 			&& entities.enabled[i][IAction])
 		{
-			int model = entities.visible[i].Model;
-			int current = entities.action[i].Current;
-			int time = entities.action[i].Time;
-			gfx::Mesh *mesh = Models[model];
-			gfx::Animation& anim = Animations[model][current];
-			gfx::AnimTrack track = ComputeTrack(anim, time);
-			std::vector<glm::mat4> bone_matrices(mesh->Bones.size());
-			ComputeBoneMatrices(-1, mesh, track, bone_matrices);
-			int x = entities.placement[i].X;
-			int y = entities.placement[i].Y;
-			int o = entities.placement[i].O;
-
+			glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			// Conversion from Blender's coordinate system
-			glm::mat4 coords = glm::mat4(
-				0.f, 0.f,  -o, 0.f,
-				 -o, 0.f, 0.f, 0.f,
-				0.f, 1.f, 0.f, 0.f,
-				0.f, 0.f, 0.f, 1.f);
-			float xy_scale = 1.f/250.f;
-			glm::mat4 scale = glm::scale(glm::vec3(1.f));
-			glm::mat4 rotate(1.f);
-			glm::mat4 translate = glm::translate(
-				glm::vec3(x * xy_scale, 0.f - y * xy_scale, 0.f));
-			glm::mat4 mMatrix = translate * rotate * scale * coords;
-			glm::mat4 vMatrix = glm::lookAt(
-				glm::vec3(0.f, 15, 20),
-				glm::vec3(0, 5, 0),
-				glm::vec3(0, 1, 0));
-			glm::mat4 mvMatrix = vMatrix * mMatrix;
-			glm::mat4 pMatrix = glm::perspective(
-				glm::radians(45.0f), 16.0f / 9.0f, 1.f, 100.0f);
-			glm::vec3 diffuseColor(0.5, 0.4, 0.1);
-			CharProgram->GetUniform("uMVMatrix").Set(mvMatrix);
-			CharProgram->GetUniform("uPMatrix").Set(pMatrix);
-			CharProgram->GetUniform("uBoneMatrices").Set(bone_matrices);
-			CharProgram->GetUniform("uDiffuseColor").Set(diffuseColor);
-			CharProgram->GetUniform("uSpecularHighlight").Set(GL_FALSE);
-			CharProgram->Install();
-			mesh->Draw();
-			CharProgram->Uninstall();
+			float xy_scale = 1.f / 250.f;
+			RenderModel(
+				entities.visible[i].Model,
+				entities.action[i].Current,
+				entities.action[i].Time,
+				entities.placement[i].O,
+				entities.placement[i].X * xy_scale,
+				-entities.placement[i].Y * xy_scale,
+				1.f);
 		}
 	}
+}
+
+void GraphicsSystem::RenderModel(
+	int model, int animation, int time, int o, float xpos, float ypos, float zoom)
+{
+	gfx::Mesh *mesh = Models[model];
+	gfx::Animation& anim = Animations[model][animation];
+	gfx::AnimTrack track = ComputeTrack(anim, time);
+	std::vector<glm::mat4> bone_matrices(mesh->Bones.size());
+	ComputeBoneMatrices(-1, mesh, track, bone_matrices);
+
+	// Conversion from Blender's coordinate system
+	glm::mat4 coords = glm::mat4(
+		0.f, 0.f, -o, 0.f,
+		-o, 0.f, 0.f, 0.f,
+		0.f, 1.f, 0.f, 0.f,
+		0.f, 0.f, 0.f, 1.f);
+	float xy_scale = 1.f / 250.f;
+	glm::mat4 scale = glm::scale(glm::vec3(zoom));
+	glm::mat4 rotate(1.f);
+	glm::mat4 translate = glm::translate(
+		glm::vec3(xpos, ypos, 0.f));
+	glm::mat4 mMatrix = translate * rotate * scale * coords;
+	glm::mat4 vMatrix = glm::lookAt(
+		glm::vec3(0.f, 15, 20),
+		glm::vec3(0, 5, 0),
+		glm::vec3(0, 1, 0));
+	glm::mat4 mvMatrix = vMatrix * mMatrix;
+	glm::mat4 pMatrix = glm::perspective(
+		glm::radians(45.0f), 16.0f / 9.0f, 1.f, 100.0f);
+	glm::vec3 diffuseColor(0.5, 0.4, 0.1);
+	CharProgram->GetUniform("uMVMatrix").Set(mvMatrix);
+	CharProgram->GetUniform("uPMatrix").Set(pMatrix);
+	CharProgram->GetUniform("uBoneMatrices").Set(bone_matrices);
+	CharProgram->GetUniform("uDiffuseColor").Set(diffuseColor);
+	CharProgram->GetUniform("uSpecularHighlight").Set(GL_FALSE);
+	CharProgram->Install();
+	mesh->Draw();
+	CharProgram->Uninstall();
 }
 
 gfx::AnimTrack GraphicsSystem::ComputeTrack(gfx::Animation& anim, int time) const

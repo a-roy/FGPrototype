@@ -3,7 +3,7 @@
 in vec3 vPosition;
 in vec3 vTransformedNormal;
 
-out vec4 fColor;
+layout (location = 0) out vec4 fColor;
 
 uniform vec3 uDiffuseColor;
 uniform bool uSpecularHighlight;
